@@ -30,6 +30,14 @@ jobs:
           cd mobile_app
           flutter pub add http url_launcher image_picker flutter_tts
 
+      - name: Enable Android Internet & Query Permissions
+        run: |
+          # Inject android.permission.INTERNET into AndroidManifest.xml
+          sed -i '/<application/i \    <uses-permission android:name="android.permission.INTERNET"/>\n    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>' mobile_app/android/app/src/main/AndroidManifest.xml
+          
+          # Allow WhatsApp url_launcher intents on Android 11+
+          sed -i '/<\/manifest>/i \    <queries>\n        <package android:name="com.whatsapp" />\n        <intent>\n            <action android:name="android.intent.action.VIEW" />\n            <data android:scheme="https" />\n        </intent>\n    </queries>' mobile_app/android/app/src/main/AndroidManifest.xml
+
       - name: Inject Scanner Code
         run: |
           cat << 'EOF' > mobile_app/lib/main.dart
@@ -101,7 +109,7 @@ jobs:
             Future<void> _scan(ImageSource src) async {
               final picked = await _picker.pickImage(source: src);
               if (picked == null) return;
-              setState(() { _image = File(picked.path); _loading = true; _items = []; _summary = "Analyzing image via Cloud Cortex..."; });
+              setState(() { _image = File(picked.path); _loading = true; _items = []; _summary = "Analyzing image via Cloud..."; });
 
               try {
                 final req = http.MultipartRequest('POST', Uri.parse("https://visionsense-ai-1.onrender.com/analyze"));
