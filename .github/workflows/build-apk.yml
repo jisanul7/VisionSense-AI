@@ -101,10 +101,10 @@ jobs:
             Future<void> _scan(ImageSource src) async {
               final picked = await _picker.pickImage(source: src);
               if (picked == null) return;
-              setState(() { _image = File(picked.path); _loading = true; _items = []; _summary = "Analyzing image..."; });
+              setState(() { _image = File(picked.path); _loading = true; _items = []; _summary = "Analyzing image via Cloud Cortex..."; });
 
               try {
-                final req = http.MultipartRequest('POST', Uri.parse("http://10.123.52.81:8080/analyze"));
+                final req = http.MultipartRequest('POST', Uri.parse("https://visionsense-ai-1.onrender.com/analyze"));
                 req.files.add(await http.MultipartFile.fromPath('file', picked.path));
                 final res = await http.Response.fromStream(await req.send().timeout(const Duration(seconds: 120)));
                 if (res.statusCode == 200) {
